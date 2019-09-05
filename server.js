@@ -24,6 +24,18 @@ var requestHandler = function(request, response) {
     HINT: Explore the list of MIME Types
     https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
    */
+
+  if(parsedUrl.pathname == '/listings')
+  {
+    response.writeHead(200, {'Content-Type': 'text/plain'});
+    response.end(listingData);
+  }
+  else
+  {
+    response.writeHead(404, {'Content-Type': 'text/plain'});
+    response.end('Bad gateway error');
+  }
+  
 };
 
 fs.readFile('listings.json', 'utf8', function(err, data) {
@@ -47,5 +59,13 @@ fs.readFile('listings.json', 'utf8', function(err, data) {
   
   //Start the server
 
+  if(err) throw err;
+
+  listingData = data;
+
+  server = http.createServer(requestHandler);
+  server.listen(port, function() {
+    console.log("Server listening on: http://127.0.0.1:" + port);
+  });
 
 });
