@@ -42,7 +42,7 @@ exports.create = function(req, res) {
       res.status(400).send(err);
     } else {
       res.json(listing);
-      console.log(listing)
+      console.log(listing);
     }
   });
 };
@@ -50,7 +50,14 @@ exports.create = function(req, res) {
 /* Show the current listing */
 exports.read = function(req, res) {
   /* send back the listing as json from the request */
-  res.json(req.listing);
+  if(req.listing)
+  {
+    //res.send('<pre>' + JSON.stringify(req.listing, null, 2) + '</pre>');
+    res.json(req.listing);
+    //res.body = JSON.stringify(req.listing);
+  }
+  else
+    res.status(404).send("Error: No listing under that ID exists!");
 };
 
 /* Update a listing - note the order in which this function is called by the router*/
@@ -62,7 +69,26 @@ exports.update = function(req, res) {
   /*save the coordinates (located in req.results if there is an address property) */
  
   /* Save the listing */
+  if(req.results) {
+    req.body.coordinates = {
+      latitude: req.results.lat, 
+      longitude: req.results.lng
+    };
+  }
 
+  Listing.findOneAndUpdate({name: listing.name}, req.body, function(err, list) {
+    if(err) throw err;
+
+    console.log(list);
+    //res.send(list);
+    //res.body = req.body;
+  });
+
+  Listing.findOne({name: listing.name}, (err, list) => {
+    if(err) throw err;
+
+    res.send(list);
+  });
 };
 
 /* Delete a listing */
@@ -71,11 +97,31 @@ exports.delete = function(req, res) {
 
   /* Add your code to remove the listins */
 
+  if(!listing)
+  {
+    res.status(404).send("Error: No listing under that ID exists!");
+    return;
+  }
+
+  Listing.findOneAndDelete({name: listing.name}, function(err, list) {
+    if(err) throw err;
+
+    console.log(list);
+    res.send(list);
+  });
 };
 
 /* Retreive all the directory listings, sorted alphabetically by listing code */
 exports.list = function(req, res) {
   /* Add your code */
+
+  Listing.find({}, function(err, listings) {
+    if(err) throw err;
+
+    //res.send('<pre>' + JSON.stringify(listings.sort((a, b) => a.code.localeCompare(b.code)), null, 2) + '</pre>');
+    //res.body = JSON.stringify(listings);
+    res.json(listings);
+  });
 };
 
 /* 

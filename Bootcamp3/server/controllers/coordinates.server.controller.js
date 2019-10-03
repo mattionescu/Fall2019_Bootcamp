@@ -13,7 +13,7 @@ module.exports = function(req, res, next) {
       
     //Setup your options q and key are provided. Feel free to add others to make the JSON response less verbose and easier to read 
     var options = { 
-      q: addressTemp4,
+      q: addressTemp, // Was not functioning properly with the reformatted address
       key: config.openCage.key,  
     }
 
@@ -33,6 +33,11 @@ module.exports = function(req, res, next) {
           Assumption: if we get a result we will take the coordinates from the first result returned
         */
         //  req.results = stores you coordinates
+        
+        //console.log(JSON.parse(body).results[0]);
+        let coords = JSON.parse(body).results[0].geometry;
+        req.results = coords;
+
         next();
     });
   } else {
